@@ -46,8 +46,7 @@ int main(int argc, char const *argv[])
         pid_t processus = fork();
 
         if (processus > 0) {
-            perror("Processus pere");
-            exit(0);
+            
         }
         else if(processus == 0){ //PROCESSUS ENFANT
 
@@ -77,17 +76,20 @@ int main(int argc, char const *argv[])
                 perror("closeDSC error processus enfant");
                 exit(0);
             }
+
+            exit(0);
         }//FIN PROCESSUS enfant
         else{
             perror("erreur processus");
             exit(0);
         }
 
-        int closeDSC = close(dSC);
+        /*int closeDSC = close(dSC);
         if (closeDSC == -1){
             perror("closeDSC error processus parent");
             exit(0);
-        }
+        }*/
+        
     }
 
 
