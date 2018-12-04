@@ -3,12 +3,27 @@
 #include <netinet/ip.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h> 
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
+#include <pthread.h>
 
 
 using namespace std;
 
+
+void * MisaJour(void * par){
+
+}
+
 int main(int argc, char const *argv[])
 {
+    //id pour le thread
+    pthread_t idThSend;
+
     int dS = socket(PF_INET,SOCK_STREAM,0);
     if (dS ==-1){
         perror("error socket");
@@ -45,8 +60,12 @@ int main(int argc, char const *argv[])
 
         pid_t processus = fork();
 
-        if (processus > 0) {
-            
+        if (processus != 0) {
+            int closedSC = close(dSC);
+            if (closedSC == -1){
+                perror("closedS error");
+                exit(0);
+            }
         }
         else if(processus == 0){ //PROCESSUS ENFANT
 
@@ -62,6 +81,9 @@ int main(int argc, char const *argv[])
                 perror("recv error");
                 exit(0);
             }
+
+            //creation du thread de mis à jour 
+            //pthread_create(&idThSend,NULL,MisaJour,&buffer);
 
             cout<<"recu : "<<msg<<endl;
             int r = 10;
@@ -83,15 +105,8 @@ int main(int argc, char const *argv[])
             perror("erreur processus");
             exit(0);
         }
-
-        /*int closeDSC = close(dSC);
-        if (closeDSC == -1){
-            perror("closeDSC error processus parent");
-            exit(0);
-        }*/
-        
+  
     }
-
 
     int closedS = close(dS);
     if (closedS == -1){
