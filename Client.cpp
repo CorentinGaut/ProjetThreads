@@ -44,14 +44,21 @@ void *Recoit (void *par){
 
 void *Envoyer (void *par){
     struct Socket * resg  = (struct Socket*)(par);
-    string m = "Bonjour";
-    char * c = strdup(m.c_str());
+    
+    bool quit = true;
+
+while(quit)
+{
+    cout<<"Wesh gros bien ou bien?"<<endl;
+    cout<< "Qu'est tu veux faire?"<<endl<<endl;
+    cout<< "1 : Ecrire un message dans une case?"<<endl<<"2 : ";
     int snd = send(resg->dS,resg->message,sizeof(resg->message),0);
+}
+
     if (snd == -1){
         perror("send error");
         exit(0);
     }
-    cout<<"reponse : "<<c<<endl;
 
     pthread_exit(NULL);
 }
