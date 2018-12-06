@@ -25,7 +25,7 @@ struct Socket{
     struct sockaddr_in aS;
     socklen_t lgA;
     const char* message;
-    struct Messages msg;
+    struct Messages* msg;
 };
 
 struct Messages
@@ -55,72 +55,72 @@ void *Envoyer (void *par){
     bool quit = true;
     int choice;
 
-while(quit)
-{
-    cout<<"Wesh gros bien ou bien?"<<endl;
-    cout<< "Qu'est tu veux faire?"<<endl<<endl;
-    cout<< "1 : Ecrire un message dans une case?"<<endl<<"2 : Quitter l'application";
-    cin>>choice;
-    cout<<endl<<endl;
-    switch(choice)
+    while(quit)
     {
-        case 1:
-            {   
-                int index;
-                cout<<"A Quelle case souhaites-tu acceder? (10 cases sont accessibles)"<<endl;
-                cin>>index;
-                cout<<endl<<endl;
+        cout<<"Wesh gros bien ou bien?"<<endl;
+        cout<< "Qu'est tu veux faire?"<<endl<<endl;
+        cout<< "1 : Ecrire un message dans une case?"<<endl<<"2 : Quitter l'application";
+        cin>>choice;
+        cout<<endl<<endl;
+        switch(choice)
+        {
+            case 1:
+                {   
+                    int index;
+                    cout<<"A Quelle case souhaites-tu acceder? (10 cases sont accessibles)"<<endl;
+                    cin>>index;
+                    cout<<endl<<endl;
 
-                string messageClient;
-                cout<<"Que souhaites-tu ecrire?"<<endl;
-                cin>>messageClient;
-                cout<<endl<<endl;
+                    string messageClient;
+                    cout<<"Que souhaites-tu ecrire?"<<endl;
+                    cin>>messageClient;
+                    cout<<endl<<endl;
 
-                message.leMessage = messageClient;
-                message.index=choice;
+                    message.leMessage = messageClient;
+                    message.index=choice;
 
-                resg->msg=message;
+                    resg->msg=&message;
 
-                int snd = send(resg->dS,resg->message,sizeof(resg->message),0);
-                if (snd == -1){
-                    perror("send error");
-                    //exit(0);
+                    int snd = send(resg->dS,resg->message,sizeof(resg->message),0);
+                    if (snd == -1){
+                        perror("send error");
+                        //exit(0);
+                        break;
+                    }
+
+                    struct Socket messageRecu;
+
+                    int rcv = recv(messageRecu.dS,&messageRecu,sizeof(messageRecu),0);
+                    if (rcv == -1){
+                        perror("recv error");
+                        //exit(0);
+                        break;
+                    }
+                    if(messageRecu.msg->index==0)
+                    {
+                        cout<<"reponse : "<<messageRecu.msg->leMessage<<endl;
+                        break;  
+                    }
+                    else
+                    cout<<"reponse : "<<messageRecu.msg->leMessage<<endl;
                     break;
                 }
-
-                struct Socket messageRecu;
-
-                int rcv = recv(messageRecu.dS,&messageRecu,sizeof(messageRecu),0);
-                if (rcv == -1){
-                    perror("recv error");
-                    //exit(0);
-                    break;
-                }
-                if(messageRecu.msg.index==0)
-                {
-                    cout<<"reponse : "<<messageRecu.msg.leMessage<<endl;
-                    break;  
-                }
-                else
-                cout<<"reponse : "<<messageRecu.msg.leMessage<<endl;
+                
+            case 2: 
+            {
+                quit = false;
                 break;
             }
-            
-        case 2: 
-        {
-            quit = false;
-            break;
-        }
 
-        default :
-        {
-            cout<<"reponse invalide!!"<<endl<<endl;
-            break;
-        }
+            default :
+            {
+                cout<<"reponse invalide!!"<<endl<<endl;
+                break;
+            }
 
+        }
+        
     }
-    
-}
 
 
     pthread_exit(NULL);
@@ -128,6 +128,7 @@ while(quit)
 
 int main(int argc, char const *argv[])
 {
+    cout<<"yo";
 
     struct Socket buffer;
 
@@ -135,16 +136,17 @@ int main(int argc, char const *argv[])
     pthread_t idThSend;
 
     //initialiser la mémoire 
-    key_t sesame = ftok("Clef",1);
+    // key_t sesame = ftok("Clef",1);
 
-    int shm = shmget(sesame,sizeof(Memoire),IPC_CREAT|0666);
-    if (shm == -1){
-        perror("ShmeGet error");
-        exit(1);
-    }
+    // int shm = shmget(sesame,sizeof(Memoire),IPC_CREAT|0666);
+    // if (shm == -1){
+    //     perror("ShmeGet error");
+    //     exit(1);
+    // }
 
-    //met la memoire dans un buffer
-    struct Memoire * bufferMem = (struct Memoire*)shmat(shm, NULL, 0);
+    // //met la memoire dans un buffer
+    // struct Memoire * bufferMem = (struct Memoire*)shmat(shm, NULL, 0);
+
 
     //creation de la socket
     buffer.dS = socket(PF_INET,SOCK_STREAM,0);
