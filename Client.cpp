@@ -25,6 +25,13 @@ struct Socket{
     struct sockaddr_in aS;
     socklen_t lgA;
     const char* message;
+    struct Messages msg;
+};
+
+struct Messages
+{
+    int index;
+    string leMessage;
 };
 
 void *Recoit (void *par){
@@ -44,21 +51,77 @@ void *Recoit (void *par){
 
 void *Envoyer (void *par){
     struct Socket * resg  = (struct Socket*)(par);
-    
+    struct Messages message;
     bool quit = true;
+    int choice;
 
 while(quit)
 {
     cout<<"Wesh gros bien ou bien?"<<endl;
     cout<< "Qu'est tu veux faire?"<<endl<<endl;
-    cout<< "1 : Ecrire un message dans une case?"<<endl<<"2 : ";
-    int snd = send(resg->dS,resg->message,sizeof(resg->message),0);
+    cout<< "1 : Ecrire un message dans une case?"<<endl<<"2 : Quitter l'application";
+    cin>>choice;
+    cout<<endl<<endl;
+    switch(choice)
+    {
+        case 1:
+            {   
+                int index;
+                cout<<"A Quelle case souhaites-tu acceder? (10 cases sont accessibles)"<<endl;
+                cin>>index;
+                cout<<endl<<endl;
+
+                string messageClient;
+                cout<<"Que souhaites-tu ecrire?"<<endl;
+                cin>>messageClient;
+                cout<<endl<<endl;
+
+                message.leMessage = messageClient;
+                message.index=choice;
+
+                resg->msg=message;
+
+                int snd = send(resg->dS,resg->message,sizeof(resg->message),0);
+                if (snd == -1){
+                    perror("send error");
+                    //exit(0);
+                    break;
+                }
+
+                struct Socket messageRecu;
+
+                int rcv = recv(messageRecu.dS,&messageRecu,sizeof(messageRecu),0);
+                if (rcv == -1){
+                    perror("recv error");
+                    //exit(0);
+                    break;
+                }
+                if(messageRecu.msg.index==0)
+                {
+                    cout<<"reponse : "<<messageRecu.msg.leMessage<<endl;
+                    break;  
+                }
+                else
+                cout<<"reponse : "<<messageRecu.msg.leMessage<<endl;
+                break;
+            }
+            
+        case 2: 
+        {
+            quit = false;
+            break;
+        }
+
+        default :
+        {
+            cout<<"reponse invalide!!"<<endl<<endl;
+            break;
+        }
+
+    }
+    
 }
 
-    if (snd == -1){
-        perror("send error");
-        exit(0);
-    }
 
     pthread_exit(NULL);
 }
