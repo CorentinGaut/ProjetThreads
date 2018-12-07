@@ -16,7 +16,13 @@ using namespace std;
 
 
 void * MisaJour(void * par){
+    /*TODO :
+    Il faut prendre la même struct "Socket" que dans le client
 
+    struct Socket * resg  = (struct Socket*)(par);
+
+
+    */
 }
 
 int main(int argc, char const *argv[])

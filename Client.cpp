@@ -87,6 +87,9 @@ void *Envoyer (void *par){
                         //exit(0);
                         break;
                     }
+                    
+
+                    //TODO : Pourquoi on fait un rcv dans le thread "Envoyer" ????
 
                     struct Socket messageRecu;
 
@@ -109,6 +112,7 @@ void *Envoyer (void *par){
             case 2: 
             {
                 quit = false;
+                //TODO : close les socket et tout le bordel non ? 
                 break;
             }
 
