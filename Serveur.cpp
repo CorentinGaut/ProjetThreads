@@ -35,7 +35,7 @@ void *miseAJour(void * param){
   while (1) {
     for(int i = 0; i < NB_SEMA-1; i++){
       if((valSem = semctl(structClient->idSem,i,GETVAL)) == -1){
-        perror("semctl ");
+        perror("semctl15 ");
         exit(-1);
       }
       opP(structClient->idSem,NB_SEMA-1);
@@ -84,7 +84,7 @@ int main(int argc, char const *argv[])
     }
 
     //On créé une clé pour les IPCtabMemoire
-    key_t cle = ftok("readme.txt",32);
+    key_t cle = ftok("Clef",32);
     if(cle == -1){
         perror("ftok ");
         exit(-1);
@@ -113,10 +113,11 @@ int main(int argc, char const *argv[])
         exit(-1);
     }
 
+    printf("%d", cle);
     //Initialisation des sémaphores
     for(int i = 0; i < NB_SEMA; i++){
         if(semctl(id_sem,i,SETVAL,1) == -1){
-            perror("semctl ");
+            perror("semctl2 ");
             exit(-1);
         }
     }
@@ -176,7 +177,7 @@ int main(int argc, char const *argv[])
 
             for(int i = 0; i < NB_SEMA-1; i++){
               if(semctl(id_sem,i,SETVAL,semctl(id_sem,i,GETVAL)+1) == -1){
-                perror("semctl ");
+                perror("semctl3 ");
                 exit(-1);
               }
             }
@@ -209,11 +210,11 @@ int main(int argc, char const *argv[])
               strcpy(msg.msg,"");
               printf("message = %s\n", adClient.tabMem->tab[msg.i]);
               if(semctl(id_sem,msg.i * TAILLE_TAB,SETVAL,tabParta->nbClients) == -1){
-                perror("semctl ");
+                perror("semctl4 ");
                 exit(-1);
               }
               printf("modification de la case %d avec les message : %s\n",msg.i,tabParta->tab[msg.i]);
-              //displayTab(tabParta->tab);
+              displayTab(tabParta->tab);
               opZ(id_sem,msg.i * TAILLE_TAB);
               opV(id_sem,msg.i * TAILLE_TAB);
             }

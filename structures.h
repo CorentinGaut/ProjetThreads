@@ -15,7 +15,7 @@
 #include <errno.h>
 
 #define NB_CARAC 20
-#define TAILLE_TAB 10
+#define TAILLE_TAB 5
 #define NB_SEMA TAILLE_TAB + 1
 
 struct sembuf sempar;
