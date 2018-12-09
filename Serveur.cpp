@@ -20,7 +20,7 @@ void *miseAJour(void * param){
   int valSem;
 
   opP(structClient->idSem,NB_SEMA-1);
-  int res = send(structClient->sockClient,structClient->tabMem->tab,sizeof(char)* TAILLE_TAB * NB_CARAC,0);
+  int res = send(structClient->sockClient,structClient->tabMem->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
   if(res == -1){
     perror("recv from client ");
     exit(-1);
@@ -113,7 +113,6 @@ int main(int argc, char const *argv[])
         exit(-1);
     }
 
-    printf("%d", cle);
     //Initialisation des sémaphores
     for(int i = 0; i < NB_SEMA; i++){
         if(semctl(id_sem,i,SETVAL,1) == -1){
@@ -210,7 +209,8 @@ int main(int argc, char const *argv[])
               strcpy(msg.msg,"");
               printf("message = %s\n", adClient.tabMem->tab[msg.i]);
               if(semctl(id_sem,msg.i * TAILLE_TAB,SETVAL,tabParta->nbClients) == -1){
-                perror("semctl4 ");
+                printf("semctl4 : %d, %d, %d", id_sem, msg.i * TAILLE_TAB, tabParta->nbClients);
+                perror("semctl4");
                 exit(-1);
               }
               printf("modification de la case %d avec les message : %s\n",msg.i,tabParta->tab[msg.i]);
@@ -219,7 +219,7 @@ int main(int argc, char const *argv[])
               opV(id_sem,msg.i * TAILLE_TAB);
             }
 
-            //phtread_join(&idT,NULL);
+            pthread_join(idT,NULL);
             exit(0);
         } else { //On est dans le père
             //On ferme la socket du client

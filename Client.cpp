@@ -25,18 +25,18 @@ void *update(void * param){
   struct a_recevoir *recoie = (struct a_recevoir*) param;
   struct message msg;
 
-  int res = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
-  if(res == -1){
+  //int res = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
+  /*if(res == -1){
     perror("recv from server ");
     exit(-1);
   } else if(res == 0){
     printf("Serveur déconnecté\n");
     exit(0);
   }
-  displayTab(recoie->tab);
+  displayTab(recoie->tab);*/
 
   while(1){
-      res = recv(recoie->socket_server,&msg,sizeof(struct message),0);
+      int res = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
       if(res == -1){
         perror("recv from server ");
         exit(-1);
