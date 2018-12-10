@@ -1,19 +1,8 @@
-#include <sys/socket.h>
-#include <stdio.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <sys/sem.h>
-#include <sys/ipc.h>
-#include <limits.h>
-#include <string.h>
-#include <sys/shm.h>
-#include <arpa/inet.h>
-#include <errno.h>
+
 #include "structures.h"
+#include <iostream>
+
+using namespace std;
 
 void *miseAJour(void * param){
   struct client *structClient = (struct client *) param;
@@ -25,7 +14,7 @@ void *miseAJour(void * param){
     perror("recv from client ");
     exit(-1);
   } else if(res == 0){
-    printf("Client déconnecté\n");
+    cout<<"Client déconnecté"<<endl;
     deconnectionClient(structClient->idSem, structClient->tabMem);
     exit(0);
   }
@@ -53,12 +42,12 @@ void *miseAJour(void * param){
           perror("recv from client ");
           exit(-1);
         } else if(res == 0){
-          printf("Client déconnecté\n");
+          cout<<"Client déconnecté\n"<<endl;
           deconnectionClient(structClient->idSem, structClient->tabMem);
           exit(0);
         }
         //opZ(structClient->idSem,i);
-        printf("message envoyé pour la case %d et message : %s\n",msg.i,msg.msg);
+        cout<<"message envoyé pour la case "<<msg.i<< " et message : "<<msg.msg<<endl;
         opV(structClient->idSem,i);
       }
     }
@@ -69,7 +58,7 @@ int main(int argc, char const *argv[])
 {
     //Vérifie le nombre d'argument passé en commande
     if(argc != 2){
-        printf("Utilisation ./servtabMemoire");
+        cout<<"Utilisation ./servtabMemoire"<<endl;
         exit(0);
     }
 
@@ -157,7 +146,7 @@ int main(int argc, char const *argv[])
             perror("accept ");
         exit(-1);
         }
-        printf("Connection accepté \n");
+        cout<<"Connection accepté "<<endl;
 
         pid_t pid = fork();
         if(pid == 0){ //On est dans le fils
@@ -168,7 +157,7 @@ int main(int argc, char const *argv[])
                 perror("close ");
                 exit(-1);
             }
-            printf("Transféré au fils\n");
+            cout<<"Transféré au fils "<<endl;
 
             opP(id_sem,NB_SEMA-1);
 
@@ -200,20 +189,20 @@ int main(int argc, char const *argv[])
                 perror("recv from client ");
                 exit(-1);
               } else if(res == 0){
-                printf("Client déconnecté\n");
+                cout<<"Client déconnecté"<<endl;
                 deconnectionClient(id_sem, tabParta);
                 exit(0);
               }
               opP(id_sem,msg.i * TAILLE_TAB);
               strcpy(tabParta->tab[msg.i],msg.msg);
               strcpy(msg.msg,"");
-              printf("message = %s\n", adClient.tabMem->tab[msg.i]);
+              cout<<"message = "<<adClient.tabMem->tab[msg.i]<<endl;
               if(semctl(id_sem,msg.i * TAILLE_TAB,SETVAL,tabParta->nbClients) == -1){
-                printf("semctl4 : %d, %d, %d", id_sem, msg.i * TAILLE_TAB, tabParta->nbClients);
+                //printf("semctl4 : %d, %d, %d", id_sem, msg.i * TAILLE_TAB, tabParta->nbClients);
                 perror("semctl4");
                 exit(-1);
               }
-              printf("modification de la case %d avec les message : %s\n",msg.i,tabParta->tab[msg.i]);
+              cout<<"modification de la case "<< msg.i<<" avec les message : "<<tabParta->tab[msg.i]<<endl;
               displayTab(tabParta->tab);
               opZ(id_sem,msg.i * TAILLE_TAB);
               opV(id_sem,msg.i * TAILLE_TAB);
