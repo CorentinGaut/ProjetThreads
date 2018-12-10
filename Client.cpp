@@ -12,7 +12,10 @@
 #include <string.h>
 #include <sys/shm.h>
 #include <arpa/inet.h>
+#include <iostream>
 #include "structures.h"
+
+using namespace std;
 
 
 struct a_recevoir {
@@ -41,13 +44,13 @@ void *update(void * param){
         perror("recv from server ");
         exit(-1);
       } else if(res == 0){
-        printf("Serveur déconnecté\n");
+        cout<<"Serveur déconnecté\n";
         exit(0);
       }
-      printf("message recu\n");
+      cout<<"message recu\n";
       strcpy(recoie->tab[msg.i],msg.msg);
       strcpy(msg.msg, "");
-      printf("message apres vidage = %s\n", msg.msg);
+      cout<<"message apres vidage = "<<endl<< msg.msg;
       displayTab(recoie->tab);
   }
 }
@@ -56,8 +59,8 @@ int main(int argc, char const *argv[])
 {
     //Vérifie le nombre d'argument passé en commande
     if(argc != 3){
-        printf("Utilisation ./client addresseIP numPort  %d\n",argc);
-        exit(0);
+        cout<<"passez en paramètre l'addresseIP et le numero de port"<<endl;
+        exit(-1);
     }
 
     //On créé la socket
@@ -81,7 +84,7 @@ int main(int argc, char const *argv[])
         perror("connect ");
         exit(-1);
     }
-    printf("Connection établie\n");
+    cout<<"Connection établie"<<endl;
 
     struct message msg;
     struct a_recevoir arcv;
@@ -92,11 +95,11 @@ int main(int argc, char const *argv[])
     pthread_create(&id,NULL,update,&arcv);
     //On peut échanger avec le serveur 
     while(1){
-      printf("Quel index du tableau : ");
+      cout<<"Quel index du tableau? (max "<<TAILLE_TAB<<")"<<endl;
       scanf("%d",&msg.i);
-      printf("entrez votre message : ");
+      cout<<"entrez votre message : "<<endl;
       scanf("%s",msg.msg);
-      printf("message a envoyé = %s\n", msg.msg);
+      cout<<"message a envoyé = "<< msg.msg<<endl;
       res = send(sockServeur,&msg,sizeof(char)*NB_CARAC+ sizeof(int)*2,0);
       if(res == -1){
         perror("send to server ");
