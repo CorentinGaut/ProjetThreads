@@ -8,45 +8,46 @@ void *miseAJour(void * param){
   struct client *structClient = (struct client *) param;
   int valSem;
 
-  opP(structClient->idSem,NB_SEMA-1);
+  opP(structClient->idSem,NB_SEMA-1); //premier envoie du tableau lors de la connection du client
   int res = send(structClient->sockClient,structClient->tabMem->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
   if(res == -1){
-    perror("recv from client ");
+    perror("recv client maj");
     exit(-1);
   } else if(res == 0){
-    cout<<"Client déconnecté"<<endl;
+    cout<<"deconnection client "<<endl;
     deconnectionClient(structClient->idSem, structClient->tabMem);
     exit(0);
   }
-  //displayTab(structClient->tabMem.tab);
   opV(structClient->idSem,NB_SEMA-1);
 
-  while (1) {
+  while (1) { // boucle de misa a jour
     for(int i = 0; i < NB_SEMA-1; i++){
-      if((valSem = semctl(structClient->idSem,i,GETVAL)) == -1){
-        perror("semctl15 ");
+      if((valSem = semctl(structClient->idSem,i,GETVAL)) == -1){ // verification du numero de semaphore
+        perror("semctl maj ");
         exit(-1);
       }
-      opP(structClient->idSem,NB_SEMA-1);
+      //cout<<"opp maj nbclient"<<endl;
+      opP(structClient->idSem,NB_SEMA-1); // recupération du nombre de clients
       int nbClients = structClient->tabMem->nbClients;
       opV(structClient->idSem,NB_SEMA-1);
-      //printf("valSem = %d et nbClient+1 = %d pour le semaphore %d\n",valSem,nbClients+1,i);
-      if(valSem < nbClients + 1){
-        opP(structClient->idSem,i);
+      if(valSem <= nbClients)// test pour le numero de semaphore pour savoir si il y a eu une mise a jour
+      { 
+            cout<<"opp maj case tab"<<endl;
+
+        opP(structClient->idSem,i);  //si oui, on bloque le semaphore
         struct message msg;
         msg.i = i / TAILLE_TAB ;
-        //printf("Je vais envoyer le message = %s pour la case %d %d\n",structClient->tabMem->tab[msg.i][msg.j],msg.i,msg.j);
-        strcpy(msg.msg,structClient->tabMem->tab[msg.i]);
-        res = send(structClient->sockClient,&msg,sizeof(int)*2 + sizeof(char)*NB_CARAC /*strlen(msg.msg)*/,0);
+        strcpy(msg.msg,structClient->tabMem->tab[msg.i]); 
+        res = send(structClient->sockClient,&msg,sizeof(int)*2 + sizeof(char)*NB_CARAC ,0);
         if(res == -1){
           perror("recv from client ");
           exit(-1);
         } else if(res == 0){
-          cout<<"Client déconnecté\n"<<endl;
+          cout<<"deconnection client "<<endl;
           deconnectionClient(structClient->idSem, structClient->tabMem);
           exit(0);
         }
-        //opZ(structClient->idSem,i);
+        //mettre un rendez-vous opz;
         cout<<"message envoyé pour la case "<<msg.i<< " et message : "<<msg.msg<<endl;
         opV(structClient->idSem,i);
       }
@@ -158,6 +159,7 @@ int main(int argc, char const *argv[])
                 exit(-1);
             }
             cout<<"Transféré au fils "<<endl;
+            cout<<"opp main connectionclient"<<endl;
 
             opP(id_sem,NB_SEMA-1);
 
@@ -183,29 +185,30 @@ int main(int argc, char const *argv[])
             struct message msg;
 
             while(1){
-              //printf("msg = %s\n", msg.msg);
-              res = recv(sockClient,&msg,sizeof(char) * NB_CARAC + sizeof(int)* 2, 0);
-              if(res == -1){
-                perror("recv from client ");
-                exit(-1);
-              } else if(res == 0){
-                cout<<"Client déconnecté"<<endl;
-                deconnectionClient(id_sem, tabParta);
-                exit(0);
-              }
-              opP(id_sem,msg.i * TAILLE_TAB);
-              strcpy(tabParta->tab[msg.i],msg.msg);
-              strcpy(msg.msg,"");
-              cout<<"message = "<<adClient.tabMem->tab[msg.i]<<endl;
-              if(semctl(id_sem,msg.i * TAILLE_TAB,SETVAL,tabParta->nbClients) == -1){
-                //printf("semctl4 : %d, %d, %d", id_sem, msg.i * TAILLE_TAB, tabParta->nbClients);
-                perror("semctl4");
-                exit(-1);
-              }
-              cout<<"modification de la case "<< msg.i<<" avec les message : "<<tabParta->tab[msg.i]<<endl;
-              displayTab(tabParta->tab);
-              opZ(id_sem,msg.i * TAILLE_TAB);
-              opV(id_sem,msg.i * TAILLE_TAB);
+                //printf("msg = %s\n", msg.msg);
+                res = recv(sockClient,&msg,sizeof(char) * NB_CARAC + sizeof(int)* 2, 0);
+                if(res == -1){
+                    perror("recv from client ");
+                    exit(-1);
+                } else if(res == 0){
+                    cout<<"Client déconnecté"<<endl;
+                    deconnectionClient(id_sem, tabParta);
+                    exit(0);
+                }
+                cout<<"opv recption msg client"<<endl;
+                opP(id_sem,msg.i );
+                strcpy(tabParta->tab[msg.i],msg.msg);
+                strcpy(msg.msg,"");
+                cout<<"message = "<<adClient.tabMem->tab[msg.i]<<endl;
+                if(semctl(id_sem,msg.i ,SETVAL,tabParta->nbClients) == -1){
+                    //printf("semctl4 : %d, %d, %d", id_sem, msg.i * TAILLE_TAB, tabParta->nbClients);
+                    perror("semctl4");
+                    exit(-1);
+                }
+                cout<<"modification de la case "<< msg.i<<" avec les message : "<<tabParta->tab[msg.i]<<endl;
+                displayTab(tabParta->tab);
+                //opZ(id_sem,msg.i * TAILLE_TAB);
+                opV(id_sem,msg.i );
             }
 
             pthread_join(idT,NULL);

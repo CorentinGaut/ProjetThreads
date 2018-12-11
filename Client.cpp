@@ -28,17 +28,17 @@ void *update(void * param){
   struct a_recevoir *recoie = (struct a_recevoir*) param;
   struct message msg;
 
-  //int res = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
-  /*if(res == -1){
+  int res = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
+  if(res == -1){
     perror("recv from server ");
     exit(-1);
   } else if(res == 0){
     printf("Serveur déconnecté\n");
     exit(0);
   }
-  displayTab(recoie->tab);*/
+  displayTab(recoie->tab);
 
-  while(1){
+  //while(1){
       int res = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
       if(res == -1){
         perror("recv from server ");
@@ -52,7 +52,8 @@ void *update(void * param){
       strcpy(msg.msg, "");
       cout<<"message apres vidage = "<<endl<< msg.msg;
       displayTab(recoie->tab);
-  }
+  //}
+  pthread_exit(0);
 }
 
 int main(int argc, char const *argv[])
@@ -92,31 +93,79 @@ int main(int argc, char const *argv[])
     arcv.socket_server = sockServeur;
 
     pthread_t id;
+    bool quit=true;
     pthread_create(&id,NULL,update,&arcv);
     //On peut échanger avec le serveur 
-    while(1){
-      cout<<"Quel index du tableau? (max "<<TAILLE_TAB<<")"<<endl;
-      scanf("%d",&msg.i);
-      cout<<"entrez votre message : "<<endl;
-      scanf("%s",msg.msg);
-      cout<<"message a envoyé = "<< msg.msg<<endl;
-      res = send(sockServeur,&msg,sizeof(char)*NB_CARAC+ sizeof(int)*2,0);
-      if(res == -1){
-        perror("send to server ");
-        exit(-1);
-      } else if(res == 0){
-        printf("Serveur déconnecté\n");
-        exit(0);
+    while(quit){
+      int choix=0;
+      cout<<"Que veux tu faire? \n\t 1 : Ecrire dans le tableau\n\t 2 : Quitter \n\t 3 : Afficher le tableau"<<endl;
+      cin>>choix;
+      switch(choix)
+      {
+        case 1 : 
+        {
+          cout<<"Quel index du tableau? (max "<<TAILLE_TAB<<")"<<endl;
+          cin>>msg.i;
+          if(msg.i>=TAILLE_TAB)
+          {
+            cout<<"index innaccessible"<<endl;
+            break;
+          }
+          //string input;
+          cout<<"entrez votre message (20 caracteres max): "<<endl;
+          scanf("%s",msg.msg);
+          // cin>>input;
+          // if(sizeof(input)>NB_CARAC*sizeof(char))
+          // {
+          //   cout<<"nombre de caracteres invalide"<<endl;
+          //   break;
+          // }
+          // for(int i=0;i<20;i++)
+          // msg.msg[i]=input[i];
+          cout<<"message a envoyé = "<< msg.msg<<endl;
+          res = send(sockServeur,&msg,sizeof(char)*NB_CARAC+ sizeof(int)*2,0);
+                if(res == -1){
+          perror("send to server ");
+          exit(-1);
+          } else if(res == 0){
+            printf("Serveur déconnecté\n");
+            exit(0);
+          }
+          break;
+        }
+        case 2 :
+        { //mutex a rajouter
+          pthread_join(id,NULL);
+          cout<<"yo"<<endl;
+          //On ferme la socket créé
+          res = close(sockServeur);
+          if(res == -1){
+              perror("close ");
+              exit(-1);
+          }
+          return 0;
+        }
+        case 3 :
+        {
+          break;
+        }
       }
+      // }
+      // cout<<"Quel index du tableau? (max "<<TAILLE_TAB<<")"<<endl;
+      // scanf("%d",&msg.i);
+      // cout<<"entrez votre message : "<<endl;
+      // scanf("%s",msg.msg);
+      // cout<<"message a envoyé = "<< msg.msg<<endl;
+      // res = send(sockServeur,&msg,sizeof(char)*NB_CARAC+ sizeof(int)*2,0);
+      // if(res == -1){
+      //   perror("send to server ");
+      //   exit(-1);
+      // } else if(res == 0){
+      //   printf("Serveur déconnecté\n");
+      //   exit(0);
+      // }
       //strcpy(msg.msg, "");
     }
 
-    //On ferme la socket créé
-    res = close(sockServeur);
-    if(res == -1){
-        perror("close ");
-        exit(-1);
-    }
 
-    return 0;
 }
