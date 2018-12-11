@@ -39,8 +39,8 @@ void *update(void * param){
   displayTab(recoie->tab);
 
   //while(1){
-      int res = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
-      if(res == -1){
+      int res1 = recv(recoie->socket_server,recoie->tab,sizeof(char)*TAILLE_TAB*NB_CARAC,0);
+      if(res1 == -1){
         perror("recv from server ");
         exit(-1);
       } else if(res == 0){
@@ -50,7 +50,7 @@ void *update(void * param){
       cout<<"message recu\n";
       strcpy(recoie->tab[msg.i],msg.msg);
       strcpy(msg.msg, "");
-      cout<<"message apres vidage = "<<endl<< msg.msg;
+      cout<<"tableau = "<<endl<< msg.msg;
       displayTab(recoie->tab);
   //}
   pthread_exit(0);
@@ -136,7 +136,6 @@ int main(int argc, char const *argv[])
         case 2 :
         { //mutex a rajouter
           pthread_join(id,NULL);
-          cout<<"yo"<<endl;
           //On ferme la socket créé
           res = close(sockServeur);
           if(res == -1){
@@ -150,21 +149,6 @@ int main(int argc, char const *argv[])
           break;
         }
       }
-      // }
-      // cout<<"Quel index du tableau? (max "<<TAILLE_TAB<<")"<<endl;
-      // scanf("%d",&msg.i);
-      // cout<<"entrez votre message : "<<endl;
-      // scanf("%s",msg.msg);
-      // cout<<"message a envoyé = "<< msg.msg<<endl;
-      // res = send(sockServeur,&msg,sizeof(char)*NB_CARAC+ sizeof(int)*2,0);
-      // if(res == -1){
-      //   perror("send to server ");
-      //   exit(-1);
-      // } else if(res == 0){
-      //   printf("Serveur déconnecté\n");
-      //   exit(0);
-      // }
-      //strcpy(msg.msg, "");
     }
 
 
